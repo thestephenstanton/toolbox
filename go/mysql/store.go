@@ -24,11 +24,13 @@ var queries = map[query]string{
 	VALUES(?, ?, ?, ?)
 	`,
 	readCarQuery: `
-	SELECT id, make, model, year, is_new FROM car
+	SELECT id, make, model, year, is_new 
+	FROM car
 	WHERE id = ?
 	`,
 	readAllCarsQuery: `
-	SELECT id, make, model, year, is_new FROM car
+	SELECT id, make, model, year, is_new 
+	FROM car
 	`,
 	updateCarQuery: `
 	UPDATE car
@@ -40,7 +42,8 @@ var queries = map[query]string{
 	WHERE id = ?
 	`,
 	deleteCarQuery: `
-	DELETE FROM car WHERE id = ?
+	DELETE FROM car 
+	WHERE id = ?
 	`,
 }
 
@@ -89,7 +92,6 @@ func (store Store) Ping() (string, error) {
 // Add adds a new car in the database
 func (store Store) Add(car Car) (Car, error) {
 	stmt := store.statements[createCarQuery]
-	defer stmt.Close()
 
 	result, err := stmt.Exec(car.Make, car.Model, car.Year, car.IsNew)
 	if err != nil {
@@ -109,7 +111,6 @@ func (store Store) Add(car Car) (Car, error) {
 // Get gets a car by id
 func (store Store) Get(id int) (Car, error) {
 	stmt := store.statements[readCarQuery]
-	defer stmt.Close()
 
 	row := stmt.QueryRow(id)
 
@@ -131,7 +132,6 @@ func (store Store) Get(id int) (Car, error) {
 // GetAll gets all cars
 func (store Store) GetAll() ([]Car, error) {
 	stmt := store.statements[readAllCarsQuery]
-	defer stmt.Close()
 
 	rows, err := stmt.Query()
 	if err != nil {
@@ -162,7 +162,6 @@ func (store Store) GetAll() ([]Car, error) {
 // Update updates a car given an id
 func (store Store) Update(id int, car Car) (Car, error) {
 	stmt := store.statements[updateCarQuery]
-	defer stmt.Close()
 
 	result, err := stmt.Exec(car.Make, car.Model, car.Year, car.IsNew, id)
 	if err != nil {
@@ -185,7 +184,6 @@ func (store Store) Update(id int, car Car) (Car, error) {
 // Delete deletes a car given an id
 func (store Store) Delete(id int) error {
 	stmt := store.statements[deleteCarQuery]
-	defer stmt.Close()
 
 	result, err := stmt.Exec(id)
 	if err != nil {
