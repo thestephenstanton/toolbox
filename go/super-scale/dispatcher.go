@@ -2,8 +2,8 @@ package main
 
 type Dispatcher struct {
 	maxWorkers int
-	workerPool WorkerPool
-	WorkQueue  chan Work
+	workerPool chan Worker
+	workQueue  chan Work
 }
 
 func NewDispatcher(maxWorkers int) *Dispatcher {
@@ -32,11 +32,11 @@ func (dispatcher *Dispatcher) dispatch() {
 			go func(work Work) {
 				// try to obtain a worker job channel that is available.
 				// this will block until a worker is idle
-				worker := <-dispatcher.WorkerPool
+				worker := <-dispatcher.workerPool
 
 				// dispatch the work to the worker job channel
 				jobChannel <- job
-			}(job)
+			}(work)
 		}
 	}
 }

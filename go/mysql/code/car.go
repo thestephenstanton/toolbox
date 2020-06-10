@@ -1,4 +1,4 @@
-package car
+package main
 
 type Car struct {
 	ID    int

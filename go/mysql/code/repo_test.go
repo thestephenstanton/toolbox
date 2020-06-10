@@ -1,18 +1,20 @@
-package car
+package main
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNew(t *testing.T) {
-	_, err := New()
+	repo, err := New("root:password@tcp(127.0.0.1:3306)/mysql-go-testing")
 	assert.NoError(t, err)
+	assert.NotNil(t, repo)
 }
 
 func TestPing(t *testing.T) {
-	store, err := New()
+	store, err := New("root:password@tcp(127.0.0.1:3306)/mysql-go-testing")
 	assert.NoError(t, err)
 
 	result, err := store.Ping()
@@ -20,8 +22,12 @@ func TestPing(t *testing.T) {
 	assert.Equal(t, "pong", result)
 }
 
+func TestA(t *testing.T) {
+
+}
+
 func TestAdd(t *testing.T) {
-	store, err := New()
+	store, err := New("root:password@tcp(127.0.0.1:3306)/mysql-go-testing")
 	assert.NoError(t, err)
 
 	newCar := Car{
@@ -40,7 +46,7 @@ func TestAdd(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
-	store, err := New()
+	store, err := New("root:password@tcp(127.0.0.1:3306)/mysql-go-testing")
 	assert.NoError(t, err)
 
 	oldCar := Car{
@@ -62,7 +68,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestGetAll(t *testing.T) {
-	store, err := New()
+	store, err := New("root:password@tcp(127.0.0.1:3306)/mysql-go-testing")
 	assert.NoError(t, err)
 
 	allCars, err := store.GetAll()
@@ -71,8 +77,50 @@ func TestGetAll(t *testing.T) {
 	assert.NotEmpty(t, allCars)
 }
 
+func TestErrors(t *testing.T) {
+	testCases := []struct {
+		desc          string
+		actualErr     error
+		shouldError   bool
+		expectedError string
+	}{
+		{
+			desc:      "Both nil",
+			actualErr: nil,
+		},
+		{
+			desc:          "Regular error",
+			actualErr:     errors.New("some random error"),
+			shouldError:   true,
+			expectedError: "some random error",
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			assertCheckError(t, tc.actualErr, tc.expectedError)
+			// if tc.shouldError && tc.actualErr == nil {
+			// 	assert.Fail(t, "should have errored but didn't")
+			// }
+			// if tc.actualErr != nil {
+			// 	assert.EqualError(t, tc.actualErr, tc.expectedError)
+			// }
+		})
+	}
+}
+
+func assertCheckError(t *testing.T, actualErr error, expectedError string) {
+	shouldError := len(expectedError) > 0
+
+	if shouldError && actualErr == nil {
+		assert.Fail(t, "should have errored but didn't")
+	}
+	if actualErr != nil {
+		assert.EqualError(t, actualErr, expectedError)
+	}
+}
+
 func TestUpdate(t *testing.T) {
-	store, err := New()
+	store, err := New("root:password@tcp(127.0.0.1:3306)/mysql-go-testing")
 	assert.NoError(t, err)
 
 	oopsCar := Car{
@@ -94,7 +142,7 @@ func TestUpdate(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	store, err := New()
+	store, err := New("root:password@tcp(127.0.0.1:3306)/mysql-go-testing")
 	assert.NoError(t, err)
 
 	// Car was a hoax

@@ -1,4 +1,4 @@
-package car
+package main
 
 import (
 	"database/sql"
@@ -8,80 +8,48 @@ import (
 	"github.com/pkg/errors"
 )
 
-type query int
-
-const (
-	createCarQuery = iota + 1
-	readCarQuery
-	readAllCarsQuery
-	updateCarQuery
-	deleteCarQuery
-)
-
-var queries = map[query]string{
-	createCarQuery: `
-	INSERT INTO car(make, model, year, is_new)
-	VALUES(?, ?, ?, ?)
-	`,
-	readCarQuery: `
-	SELECT id, make, model, year, is_new 
-	FROM car
-	WHERE id = ?
-	`,
-	readAllCarsQuery: `
-	SELECT id, make, model, year, is_new 
-	FROM car
-	`,
-	updateCarQuery: `
-	UPDATE car
-	SET
-		make = ?,
-		model = ?,
-		year = ?,
-		is_new = ?
-	WHERE id = ?
-	`,
-	deleteCarQuery: `
-	DELETE FROM car 
-	WHERE id = ?
-	`,
-}
-
-// Store reads from mysql
-type Store struct {
+// Repo reads from mysql
+type Repo struct {
 	db         *sql.DB
 	statements map[query]*sql.Stmt
 }
 
-// New creates new store with prepared statements
-func New() (Store, error) {
-	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/mysql-go-testing")
+// New creates new repo with prepared statements
+func New(dataSourceName string) (Repo, error) {
+	db, err := sql.Open("mysql", dataSourceName)
 	if err != nil {
-		return Store{}, errors.Wrap(err, "failed to open connection to db")
+		return Repo{}, errors.Wrap(err, "failed to open connection to db")
 	}
 
-	statements := make(map[query]*sql.Stmt)
+	statements := map[query]*sql.Stmt{}
 
 	// Prepare statements
 	// Info: http://go-database-sql.org/prepared.html
 	for key, query := range queries {
 		statement, err := db.Prepare(query)
 		if err != nil {
-			return Store{}, errors.Wrap(err, "failed to prepare statement")
+			return Repo{}, errors.Wrap(err, "failed to prepare statement")
 		}
 
 		statements[key] = statement
 	}
 
-	return Store{
+	repo := Repo{
 		db:         db,
 		statements: statements,
-	}, nil
+	}
+
+	_, err = repo.Ping()
+	if err != nil {
+		return Repo{}, errors.Wrap(err, "failed to ping database")
+	}
+
+	return repo, nil
 }
 
 // Ping tries to ping the database
-func (store Store) Ping() (string, error) {
-	err := store.db.Ping()
+func (repo Repo) Ping() (string, error) {
+	err := repo.db.Ping()
 	if err != nil {
 		return "", errors.Wrap(err, "failed to ping")
 	}
@@ -90,8 +58,8 @@ func (store Store) Ping() (string, error) {
 }
 
 // Add adds a new car in the database
-func (store Store) Add(car Car) (Car, error) {
-	stmt := store.statements[createCarQuery]
+func (repo Repo) Add(car Car) (Car, error) {
+	stmt := repo.statements[createCarQuery]
 
 	result, err := stmt.Exec(car.Make, car.Model, car.Year, car.IsNew)
 	if err != nil {
@@ -109,8 +77,8 @@ func (store Store) Add(car Car) (Car, error) {
 }
 
 // Get gets a car by id
-func (store Store) Get(id int) (Car, error) {
-	stmt := store.statements[readCarQuery]
+func (repo Repo) Get(id int) (Car, error) {
+	stmt := repo.statements[readCarQuery]
 
 	row := stmt.QueryRow(id)
 
@@ -130,8 +98,8 @@ func (store Store) Get(id int) (Car, error) {
 }
 
 // GetAll gets all cars
-func (store Store) GetAll() ([]Car, error) {
-	stmt := store.statements[readAllCarsQuery]
+func (repo Repo) GetAll() ([]Car, error) {
+	stmt := repo.statements[readAllCarsQuery]
 
 	rows, err := stmt.Query()
 	if err != nil {
@@ -160,8 +128,8 @@ func (store Store) GetAll() ([]Car, error) {
 }
 
 // Update updates a car given an id
-func (store Store) Update(id int, car Car) (Car, error) {
-	stmt := store.statements[updateCarQuery]
+func (repo Repo) Update(id int, car Car) (Car, error) {
+	stmt := repo.statements[updateCarQuery]
 
 	result, err := stmt.Exec(car.Make, car.Model, car.Year, car.IsNew, id)
 	if err != nil {
@@ -182,8 +150,8 @@ func (store Store) Update(id int, car Car) (Car, error) {
 }
 
 // Delete deletes a car given an id
-func (store Store) Delete(id int) error {
-	stmt := store.statements[deleteCarQuery]
+func (repo Repo) Delete(id int) error {
+	stmt := repo.statements[deleteCarQuery]
 
 	result, err := stmt.Exec(id)
 	if err != nil {
