@@ -1,0 +1,7 @@
+FROM golang:1.14
+
+COPY . .
+
+RUN go build -o server
+
+CMD ./server

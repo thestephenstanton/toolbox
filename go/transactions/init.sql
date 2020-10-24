@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS parent(
+    id INT AUTO_INCREMENT,
+    name VARCHAR(16) NOT NULL,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS child(
+    id INT AUTO_INCREMENT,
+    name VARCHAR(16) NOT NULL,
+    parent_id INT NOT NULL,
+    PRIMARY KEY(id),
+    FOREIGN KEY(parent_id) REFERENCES parent(id) ON DELETE CASCADE
+);
