@@ -29,10 +29,3 @@ func main() {
 
 	time.Sleep(1 * time.Second)
 }
-
-1, 2, 3, 4, 5
-e, d, d, e, d
-
-d, d, d
-
-5 -  = 0
