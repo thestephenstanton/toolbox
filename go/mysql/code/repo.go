@@ -61,7 +61,7 @@ func (repo Repo) Ping() (string, error) {
 func (repo Repo) Add(car Car) (Car, error) {
 	stmt := repo.statements[createCarQuery]
 
-	result, err := stmt.Exec(car.Make, car.Model, car.Year, car.IsNew)
+	result, err := stmt.Exec(car.Make, car.Model, car.Year, car.IsNew, car.Mileage)
 	if err != nil {
 		return Car{}, errors.Wrap(err, "failed to execute prepared statement")
 	}
@@ -89,6 +89,7 @@ func (repo Repo) Get(id int) (Car, error) {
 		&car.Model,
 		&car.Year,
 		&car.IsNew,
+		&car.Mileage,
 	)
 	if err != nil {
 		return Car{}, errors.Wrap(err, fmt.Sprintf("failed to read car with id %d", id))
@@ -116,6 +117,7 @@ func (repo Repo) GetAll() ([]Car, error) {
 			&car.Model,
 			&car.Year,
 			&car.IsNew,
+			&car.Mileage,
 		)
 		if err != nil {
 			return []Car{}, errors.Wrap(err, "failed to read car row")
@@ -131,7 +133,7 @@ func (repo Repo) GetAll() ([]Car, error) {
 func (repo Repo) Update(id int, car Car) (Car, error) {
 	stmt := repo.statements[updateCarQuery]
 
-	result, err := stmt.Exec(car.Make, car.Model, car.Year, car.IsNew, id)
+	result, err := stmt.Exec(car.Make, car.Model, car.Year, car.IsNew, car.Mileage, id)
 	if err != nil {
 		return Car{}, errors.Wrap(err, fmt.Sprintf("failed to update car with id %d", id))
 	}

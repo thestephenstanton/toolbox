@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS car(
     make VARCHAR(32) NOT NULL,
     model VARCHAR(32) NOT NULL,
     `year` INT NOT NULL,
-    is_new BOOLEAN NOT NULL
+    is_new BOOLEAN NOT NULL,
+    mileage INT
 )

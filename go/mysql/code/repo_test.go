@@ -27,10 +27,11 @@ func TestAdd(t *testing.T) {
 	assert.NoError(t, err)
 
 	newCar := Car{
-		Make:  "Audi",
-		Model: "RS7",
-		Year:  2020,
-		IsNew: true,
+		Make:    "Audi",
+		Model:   "RS7",
+		Year:    2020,
+		IsNew:   true,
+		Mileage: intPtr(42000),
 	}
 
 	savedCar, err := store.Add(newCar)
@@ -130,6 +131,7 @@ func TestUpdate(t *testing.T) {
 	assert.NoError(t, err)
 
 	carToUpdate.Make = "Rolls-Royce"
+	carToUpdate.Mileage = intPtr(1)
 
 	updatedCar, err := store.Update(carToUpdate.ID, carToUpdate)
 	assert.NoError(t, err)
@@ -154,4 +156,8 @@ func TestDelete(t *testing.T) {
 
 	err = store.Delete(shitCar.ID)
 	assert.NoError(t, err)
+}
+
+func intPtr(i int) *int {
+	return &i
 }

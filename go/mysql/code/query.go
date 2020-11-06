@@ -12,16 +12,16 @@ const (
 
 var queries = map[query]string{
 	createCarQuery: `
-	INSERT INTO car(make, model, year, is_new)
-	VALUES(?, ?, ?, ?)
+	INSERT INTO car(make, model, year, is_new, mileage)
+	VALUES(?, ?, ?, ?, ?)
 	`,
 	readCarQuery: `
-	SELECT id, make, model, year, is_new 
+	SELECT id, make, model, year, is_new, mileage
 	FROM car
 	WHERE id = ?
 	`,
 	readAllCarsQuery: `
-	SELECT id, make, model, year, is_new 
+	SELECT id, make, model, year, is_new, mileage
 	FROM car
 	`,
 	updateCarQuery: `
@@ -30,7 +30,8 @@ var queries = map[query]string{
 		make = ?,
 		model = ?,
 		year = ?,
-		is_new = ?
+		is_new = ?,
+		mileage = ?
 	WHERE id = ?
 	`,
 	deleteCarQuery: `
